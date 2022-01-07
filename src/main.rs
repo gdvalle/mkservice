@@ -22,6 +22,8 @@ struct Args {
     env: Vec<String>,
     #[clap(long, arg_enum, default_value = "system")]
     level: ServiceLevel,
+    #[clap(long)]
+    start: bool,
 }
 
 #[derive(clap::ArgEnum, Clone, Debug, PartialEq)]
@@ -146,7 +148,7 @@ impl Service {
     }
 }
 
-fn create_systemd_service(service: &Service) -> Result<()> {
+fn create_systemd_service(service: &Service, start: bool) -> Result<()> {
     let safe_unit_name = systemd_escape(vec![service.name.clone()], vec![])?;
     let unit_file_name = format!("{}.service", safe_unit_name);
     use std::path::PathBuf;
@@ -191,6 +193,16 @@ fn create_systemd_service(service: &Service) -> Result<()> {
         .arg(service.name.clone())
         .spawn()?
         .wait()?;
+
+    if start {
+        log::info!("Starting service...");
+        Command::new(&base_command[0])
+            .args(&base_command[1..])
+            .arg("start")
+            .arg(service.name.clone())
+            .spawn()?
+            .wait()?;
+    }
 
     Ok(())
 }
@@ -241,7 +253,7 @@ fn main() {
     // systemd
     if Path::new("/run/systemd/system").exists() {
         log::info!("systemd detected, creating service...");
-        if let Err(e) = create_systemd_service(&service) {
+        if let Err(e) = create_systemd_service(&service, args.start) {
             log::error!("Failed creating service: {:?}", e);
             exit(1);
         }
