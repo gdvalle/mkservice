@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-#[derive(clap::ArgEnum, Clone, Debug, PartialEq)]
+#[derive(clap::ValueEnum, Clone, Debug, PartialEq, Eq)]
 pub enum ServiceLevel {
     User,
     System,

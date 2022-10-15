@@ -11,12 +11,12 @@ mod provider;
 #[derive(Parser, Debug)]
 #[clap(about, version, author)]
 struct Args {
-    #[clap(parse(try_from_str = validate_name))]
+    #[clap(value_parser = validate_name)]
     name: String,
     command: Vec<String>,
     #[clap(short, long)]
     env: Vec<String>,
-    #[clap(long, arg_enum, default_value = "system")]
+    #[clap(long, value_enum, default_value = "system")]
     level: ServiceLevel,
     #[clap(long)]
     start: bool,
@@ -29,8 +29,8 @@ pub trait ServiceOperator {
 
 fn str_partition(string: &str, delimiter: &str) -> (String, String) {
     let mut splitter = string.splitn(2, delimiter);
-    let first = splitter.next().or(Some("")).unwrap().into();
-    let second = splitter.next().or(Some("")).unwrap().into();
+    let first = splitter.next().unwrap_or("").into();
+    let second = splitter.next().unwrap_or("").into();
     (first, second)
 }
 

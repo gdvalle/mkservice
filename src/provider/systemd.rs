@@ -7,6 +7,7 @@ use serde::{Serialize, Serializer};
 use std::collections::BTreeMap;
 use std::env;
 use std::fs;
+use std::path::PathBuf;
 use std::fs::File;
 use std::io::Write;
 use std::process::Command;
@@ -136,7 +137,7 @@ impl ServiceOperator for Systemd {
     fn install(&self) -> Result<()> {
         let safe_unit_name = systemd_escape(vec![self.service.name.clone()], vec![])?;
         let unit_file_name = format!("{}.service", safe_unit_name);
-        use std::path::PathBuf;
+
         let unit_path = match self.service.level {
             ServiceLevel::System => PathBuf::from(r"/etc/systemd/system"),
             ServiceLevel::User => {
@@ -154,7 +155,7 @@ impl ServiceOperator for Systemd {
             "Writing systemd unit to {:?}:{}{}",
             unit_path,
             debug_prefix,
-            content.replace("\n", debug_prefix)
+            content.replace('\n', debug_prefix)
         );
         let mut file = File::create(&unit_path)?;
         file.write_all(content.as_bytes())?;
@@ -179,6 +180,7 @@ impl ServiceOperator for Systemd {
 
         Ok(())
     }
+
     fn start(&self) -> Result<()> {
         self.systemctl_command()
             .arg("start")
