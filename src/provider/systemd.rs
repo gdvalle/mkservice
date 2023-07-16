@@ -123,6 +123,7 @@ impl Systemd {
                     .iter()
                     .map(|(k, v)| format!("{}={}", k, v))
                     .collect::<Vec<String>>(),
+                "Restart" => "on-failure",
             )),
             install: convert_args!(btreemap!(
                 "WantedBy" => "multi-user.target",
@@ -223,6 +224,7 @@ mod tests {
             Environment=BAR=bar\n\
             Environment=FOO=foo\n\
             ExecStart=\"/bin/sh\" \"-c\" \"echo hello\"\n\
+            Restart=on-failure\n\
             Type=simple\n\
             ",
         )
